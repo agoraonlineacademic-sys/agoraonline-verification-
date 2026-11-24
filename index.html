@@ -481,6 +481,16 @@ document.getElementById("certificateId")
         }
     });
 
+// Automatically verify certificate from QR Code URL
+const urlParams = new URLSearchParams(window.location.search);
+const certificateIdFromURL = urlParams.get("id");
+
+if (certificateIdFromURL) {
+    const input = document.getElementById("certificateId");
+    input.value = certificateIdFromURL.trim().toUpperCase();
+    verifyCertificate();
+}
+
 </script>
 
 </body>
