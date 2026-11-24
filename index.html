@@ -1,1 +1,488 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102747">
+
+<title>AgoraOnline | Certificate Verification</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f6fa;
+    color: #26364a;
+    min-height: 100vh;
+}
+
+header {
+    background: #102747;
+    color: white;
+    text-align: center;
+    padding: 35px 15px;
+    border-bottom: 5px solid #c6a45b;
+}
+
+.logo {
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.logo span {
+    color: #d8b96e;
+}
+
+header p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #dbe4ef;
+    letter-spacing: 1px;
+}
+
+.container {
+    width: 92%;
+    max-width: 650px;
+    margin: 45px auto;
+}
+
+.card {
+    background: white;
+    padding: 32px;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(16,39,71,0.09);
+}
+
+h1 {
+    color: #102747;
+    font-size: 25px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    color: #718096;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #26364a;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccd5e0;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    text-transform: uppercase;
+}
+
+input:focus {
+    border-color: #c6a45b;
+    box-shadow: 0 0 0 3px rgba(198,164,91,0.15);
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #102747;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1c416e;
+}
+
+button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+#result {
+    margin-top: 25px;
+}
+
+.result-card {
+    padding: 23px;
+    border-radius: 10px;
+    border: 1px solid #e0e5ec;
+    background: #fbfcfe;
+}
+
+.status {
+    display: inline-block;
+    padding: 8px 17px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.valid {
+    color: #167344;
+    background: #e4f5eb;
+}
+
+.pending {
+    color: #986500;
+    background: #fff3d5;
+}
+
+.invalid {
+    color: #b42318;
+    background: #fde9e7;
+}
+
+.details {
+    margin-top: 8px;
+    border-top: 1px solid #e2e7ed;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid #e8edf2;
+    font-size: 14px;
+}
+
+.detail-row strong {
+    color: #102747;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.message {
+    text-align: center;
+    padding: 17px;
+    border-radius: 8px;
+    background: #f1f4f8;
+    color: #526176;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    padding: 25px 15px;
+    color: #718096;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+footer strong {
+    color: #102747;
+}
+
+@media(max-width: 480px) {
+    .container {
+        margin: 25px auto;
+    }
+
+    .card {
+        padding: 22px 17px;
+    }
+
+    h1 {
+        font-size: 21px;
+    }
+
+    .detail-row {
+        font-size: 13px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">AGORA<span>ONLINE</span></div>
+    <p>ACADEMIC & RESEARCH COMMUNITY</p>
+</header>
+
+<main class="container">
+    <section class="card">
+
+        <h1>Certificate Verification</h1>
+
+        <p class="subtitle">
+            Verify the authenticity of your AgoraOnline
+            certificate using its unique Certificate ID.
+        </p>
+
+        <label for="certificateId">Certificate ID</label>
+
+        <input
+            type="text"
+            id="certificateId"
+            placeholder="e.g. AGORA-2026-001"
+            autocomplete="off"
+        >
+
+        <button id="verifyButton" type="button">
+            Verify Certificate
+        </button>
+
+        <div id="result" aria-live="polite"></div>
+
+    </section>
+</main>
+
+<footer>
+    <strong>AGORAONLINE</strong><br>
+    Digital Certificate Verification Portal<br>
+    © 2026 AgoraOnline. All Rights Reserved.
+</footer>
+
+<script>
+
+// Read certificate records from the CSV file
+// located in the same GitHub repository.
+
+let certificateRecords = null;
+
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (char === '"') {
+            if (quoted && text[i + 1] === '"') {
+                cell += '"';
+                i++;
+            } else {
+                quoted = !quoted;
+            }
+        } else if (char === "," && !quoted) {
+            row.push(cell);
+            cell = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+            if (char === "\r" && text[i + 1] === "\n") i++;
+            row.push(cell);
+            if (row.some(value => value.trim() !== "")) {
+                rows.push(row);
+            }
+            row = [];
+            cell = "";
+        } else {
+            cell += char;
+        }
+    }
+
+    row.push(cell);
+
+    if (row.some(value => value.trim() !== "")) {
+        rows.push(row);
+    }
+
+    if (rows.length < 2) return [];
+
+    const headers = rows[0].map(value =>
+        value.trim().replace(/^\uFEFF/, "").toLowerCase()
+    );
+
+    return rows.slice(1).map(values => {
+        const record = {};
+
+        headers.forEach((header, index) => {
+            record[header] = (values[index] || "").trim();
+        });
+
+        return {
+            id: record["certificate id"] || "",
+            name: record["participant"] || "",
+            session: record["session"] || "",
+            date: record["issue date"] || "",
+            status: record["status"] || ""
+        };
+    });
+}
+
+async function loadCertificates() {
+    if (certificateRecords !== null) {
+        return certificateRecords;
+    }
+
+    const response = await fetch("./certificates.csv", {
+        cache: "no-store"
+    });
+
+    if (!response.ok) {
+        throw new Error("Certificate database is unavailable.");
+    }
+
+    const csvText = await response.text();
+    certificateRecords = parseCSV(csvText);
+
+    return certificateRecords;
+}
+
+function showMessage(message) {
+    document.getElementById("result").innerHTML = "";
+
+    const box = document.createElement("div");
+    box.className = "message";
+    box.textContent = message;
+
+    document.getElementById("result").appendChild(box);
+}
+
+function showCertificate(record) {
+    const status = record.status.trim().toLowerCase();
+
+    let label;
+    let className;
+
+    if (status === "approved" || status === "valid") {
+        label = "CERTIFICATE VERIFIED";
+        className = "valid";
+    } else if (status === "pending") {
+        label = "CERTIFICATE PENDING";
+        className = "pending";
+    } else {
+        label = "CERTIFICATE INVALID";
+        className = "invalid";
+    }
+
+    const result = document.getElementById("result");
+    result.innerHTML = "";
+
+    const card = document.createElement("div");
+    card.className = "result-card";
+
+    const badge = document.createElement("span");
+    badge.className = "status " + className;
+    badge.textContent = label;
+    card.appendChild(badge);
+
+    const details = document.createElement("div");
+    details.className = "details";
+
+    const fields = [
+        ["Participant", record.name],
+        ["Certificate ID", record.id],
+        ["Session", record.session],
+        ["Issue Date", record.date],
+        ["Status", status.toUpperCase()]
+    ];
+
+    fields.forEach(([label, value]) => {
+        const line = document.createElement("div");
+        line.className = "detail-row";
+
+        const left = document.createElement("span");
+        left.textContent = label;
+
+        const right = document.createElement("strong");
+        right.textContent = value || "Not available";
+
+        line.appendChild(left);
+        line.appendChild(right);
+        details.appendChild(line);
+    });
+
+    card.appendChild(details);
+    result.appendChild(card);
+}
+
+async function verifyCertificate() {
+    const input = document.getElementById("certificateId");
+    const button = document.getElementById("verifyButton");
+
+    const certificateId = input.value.trim().toUpperCase();
+
+    if (!certificateId) {
+        showMessage("Please enter your Certificate ID.");
+        input.focus();
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Checking...";
+    showMessage("Searching certificate database...");
+
+    try {
+        const records = await loadCertificates();
+
+        const certificate = records.find(record =>
+            record.id.trim().toUpperCase() === certificateId
+        );
+
+        if (!certificate) {
+            const result = document.getElementById("result");
+            result.innerHTML = "";
+
+            const card = document.createElement("div");
+            card.className = "result-card";
+
+            const badge = document.createElement("span");
+            badge.className = "status invalid";
+            badge.textContent = "CERTIFICATE NOT FOUND";
+
+            const message = document.createElement("p");
+            message.textContent =
+                "No certificate with this ID was found in our database.";
+
+            card.appendChild(badge);
+            card.appendChild(message);
+            result.appendChild(card);
+
+        } else {
+            showCertificate(certificate);
+        }
+
+    } catch (error) {
+        showMessage(
+            "Unable to connect to the certificate database. " +
+            "Please try again later."
+        );
+        console.error(error);
+
+    } finally {
+        button.disabled = false;
+        button.textContent = "Verify Certificate";
+    }
+}
+
+document.getElementById("verifyButton")
+    .addEventListener("click", verifyCertificate);
+
+document.getElementById("certificateId")
+    .addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            verifyCertificate();
+        }
+    });
+
+</script>
+
+</body>
+</html>
+
